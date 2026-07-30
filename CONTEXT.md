@@ -62,7 +62,32 @@ tem acesso total. Ninguém edita `isAdmin`/`departamentosPrestador` do próprio 
   senão dá pra burlar via SDK/REST direto, como já aconteceu (e foi corrigido) nos projetos
   irmãos.
 
-## Status
+## Status (2026-07-30)
 
-Ver o plano da sessão que criou este projeto para o histórico completo de decisões.
-Em construção — primeira versão ainda não publicada no Firebase/GitHub Pages.
+**No ar e funcional**, ponta a ponta testado no ambiente de produção:
+- GitHub Pages: https://orflie-analyst.github.io/serviceorder/
+- Firebase: projeto `orflie-serviceorder` (conta @orflie.com), Firestore em `southamerica-east1`.
+- Primeiro admin criado: `arnaldo.hungria@orflie.com` (`isAdmin: true`).
+- Departamentos reais já cadastrados: **TI** e **Comercial** (via `admin.html`).
+- Fluxo completo validado no navegador: login → criar departamento → abrir OS → assumir
+  ("Em andamento") → concluir, com o histórico de anotações e o painel do prestador
+  refletindo cada mudança corretamente.
+
+**Índices compostos do Firestore** (`firestore.indexes.json`, deploy via
+`firebase deploy --only firestore:indexes`): sem eles, `minhas-os.js` e `painel.js`
+falham com `failed-precondition`. Um índice novo leva ~1-2 min pra ficar pronto depois do
+deploy — normal, não é bug.
+
+**Bootstrap do primeiro admin**: como a regra `usuarios` exige `souAdmin()` pra criar
+qualquer doc (evitando auto-promoção), o primeiro admin não pode se auto-cadastrar pela
+UI. Foi criado manualmente: (1) `accounts:signUp` via REST com a apiKey pública pra criar
+o Auth user, (2) regra `usuarios` temporariamente relaxada **só pro uid específico**
+daquela conta, (3) doc `usuarios/{uid}` criado via Firestore REST com o idToken dessa
+conta, (4) regra revertida e redeployada imediatamente. Não precisa repetir esse processo
+— só documentado aqui caso um segundo Firebase project precise do mesmo bootstrap no
+futuro (ex: se este projeto for clonado para outra empresa/ambiente).
+
+**Gap conhecido**: `admin.html` só tem formulário de *criar* usuário — não dá pra editar
+`isAdmin`/`departamentosPrestador`/`ativo` de um usuário já existente pela UI. Pra isso
+hoje só dá via Firestore Console ou console JS autenticado como admin (as regras permitem,
+só falta a tela). Vale adicionar uma UI de edição se isso virar necessidade recorrente.
