@@ -3,13 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Login · Ordens de Serviço Orflie</title>
+<title>Login · Sistema de Ordem de Serviço Orflie</title>
 <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 <main class="login-wrap">
   <div class="card">
-    <h1>Ordens de Serviço · Orflie</h1>
+    <div class="login-logo">
+      <img src="assets/orflie-logo.png" alt="Orflie" />
+      <p>Sistema de Ordem de Serviço</p>
+    </div>
+
     <form id="form-login">
       <label for="email">Email</label>
       <input type="email" id="email" required autocomplete="username" />
@@ -18,25 +22,55 @@
       <input type="password" id="senha" required autocomplete="current-password" />
 
       <button class="btn" type="submit" id="btn-entrar">Entrar</button>
-      <p class="erro hidden" id="erro"></p>
+      <p class="erro hidden" id="erro-login"></p>
     </form>
-    <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem;">
-      Não tem uma conta? Peça ao administrador para cadastrar seu acesso.
+
+    <form id="form-cadastro" class="hidden">
+      <label for="c-nome">Nome</label>
+      <input type="text" id="c-nome" required maxlength="100" />
+
+      <label for="c-email">Email</label>
+      <input type="email" id="c-email" required placeholder="voce@orflie.com" />
+
+      <label for="c-senha">Senha</label>
+      <input type="password" id="c-senha" required minlength="6" autocomplete="new-password" />
+
+      <label for="c-senha2">Confirmar senha</label>
+      <input type="password" id="c-senha2" required minlength="6" autocomplete="new-password" />
+
+      <button class="btn" type="submit" id="btn-cadastrar">Criar conta</button>
+      <p class="erro hidden" id="erro-cadastro"></p>
+    </form>
+
+    <p style="font-size: 0.85rem; margin-top: 1.25rem;">
+      <a href="#" id="link-alternar">Não tem uma conta? Criar conta</a>
     </p>
   </div>
 </main>
 
 <script type="module">
-  import { login, redirectIfLoggedIn } from "./app/auth.js";
+  import { login, signup, redirectIfLoggedIn, DOMINIO_PERMITIDO } from "./app/auth.js";
 
   redirectIfLoggedIn();
 
-  const form = document.getElementById("form-login");
-  const erro = document.getElementById("erro");
-  const btn = document.getElementById("btn-entrar");
+  const formLogin = document.getElementById("form-login");
+  const formCadastro = document.getElementById("form-cadastro");
+  const linkAlternar = document.getElementById("link-alternar");
 
-  form.addEventListener("submit", async (e) => {
+  linkAlternar.addEventListener("click", (e) => {
     e.preventDefault();
+    const mostrandoCadastro = !formCadastro.classList.contains("hidden");
+    formLogin.classList.toggle("hidden", !mostrandoCadastro);
+    formCadastro.classList.toggle("hidden", mostrandoCadastro);
+    linkAlternar.textContent = mostrandoCadastro
+      ? "Não tem uma conta? Criar conta"
+      : "Já tem uma conta? Entrar";
+  });
+
+  formLogin.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const erro = document.getElementById("erro-login");
+    const btn = document.getElementById("btn-entrar");
     erro.classList.add("hidden");
     btn.disabled = true;
     btn.textContent = "Entrando...";
@@ -48,6 +82,44 @@
       erro.classList.remove("hidden");
       btn.disabled = false;
       btn.textContent = "Entrar";
+    }
+  });
+
+  formCadastro.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const erro = document.getElementById("erro-cadastro");
+    const btn = document.getElementById("btn-cadastrar");
+    erro.classList.add("hidden");
+
+    const nome = document.getElementById("c-nome").value.trim();
+    const email = document.getElementById("c-email").value.trim();
+    const senha = document.getElementById("c-senha").value;
+    const senha2 = document.getElementById("c-senha2").value;
+
+    if (!email.toLowerCase().endsWith(`@${DOMINIO_PERMITIDO}`)) {
+      erro.textContent = `Use um email @${DOMINIO_PERMITIDO}.`;
+      erro.classList.remove("hidden");
+      return;
+    }
+    if (senha !== senha2) {
+      erro.textContent = "As senhas não coincidem.";
+      erro.classList.remove("hidden");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = "Criando...";
+    try {
+      await signup(nome, email, senha);
+      window.location.href = "minhas-os.html";
+    } catch (err) {
+      erro.textContent =
+        err.code === "auth/email-already-in-use"
+          ? "Já existe uma conta com esse email."
+          : err.message || "Não foi possível criar a conta.";
+      erro.classList.remove("hidden");
+      btn.disabled = false;
+      btn.textContent = "Criar conta";
     }
   });
 </script>

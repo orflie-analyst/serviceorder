@@ -1,11 +1,20 @@
 import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { auth, db } from "./firebase-init.js";
 import { el } from "./dom.js";
+
+// Auto-cadastro fica restrito a este domínio (reforçado também nas Firestore rules).
+export const DOMINIO_PERMITIDO = "orflie.com";
 
 export function login(email, senha) {
   return signInWithEmailAndPassword(auth, email, senha);
@@ -13,6 +22,25 @@ export function login(email, senha) {
 
 export function logout() {
   return signOut(auth);
+}
+
+// Auto-cadastro: qualquer colaborador com email @orflie.com pode criar a própria conta,
+// sempre como solicitante comum (isAdmin false, sem departamentos de prestador) — só um
+// admin pode promover depois, via admin.html.
+export async function signup(nome, email, senha) {
+  if (!email.toLowerCase().endsWith(`@${DOMINIO_PERMITIDO}`)) {
+    throw new Error(`Use um email @${DOMINIO_PERMITIDO}.`);
+  }
+  const cred = await createUserWithEmailAndPassword(auth, email, senha);
+  await setDoc(doc(db, "usuarios", cred.user.uid), {
+    nome,
+    email,
+    isAdmin: false,
+    departamentosPrestador: [],
+    ativo: true,
+    criadoEm: serverTimestamp(),
+  });
+  return cred.user;
 }
 
 // Chama callback(user, perfil) quando autenticado; redireciona pra index.html se não estiver.
@@ -65,9 +93,11 @@ export function renderTopbar(activePage, perfil) {
     el("button", { class: "link-btn", type: "button", onclick: () => logout().then(() => (window.location.href = "index.html")) }, "Sair")
   );
 
-  const header = el("header", { class: "topbar" }, [
-    el("span", { class: "brand" }, "Orflie · Ordens de Serviço"),
-    nav,
+  const brand = el("a", { href: "minhas-os.html", class: "brand" }, [
+    el("img", { src: "assets/orflie-logo.png", alt: "Orflie" }),
+    el("span", {}, "Sistema de Ordem de Serviço"),
   ]);
+
+  const header = el("header", { class: "topbar" }, [brand, nav]);
   document.body.insertBefore(header, document.body.firstChild);
 }

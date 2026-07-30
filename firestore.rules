@@ -23,9 +23,19 @@ service cloud.firestore {
         departamentoId in meuUsuario().departamentosPrestador;
     }
 
+    // Auto-cadastro: só com email @orflie.com (confirmado pelo token, não pelo campo
+    // enviado) e sempre com privilégios mínimos — só um admin promove depois.
+    function autoCadastroValido() {
+      return request.auth.token.email == request.resource.data.email &&
+        request.auth.token.email.matches('.*@orflie[.]com$') &&
+        request.resource.data.isAdmin == false &&
+        request.resource.data.departamentosPrestador.size() == 0 &&
+        request.resource.data.ativo == true;
+    }
+
     match /usuarios/{uid} {
       allow read: if logado() && (request.auth.uid == uid || souAdmin());
-      allow create: if souAdmin();
+      allow create: if souAdmin() || (logado() && request.auth.uid == uid && autoCadastroValido());
       // Usuário comum só pode alterar campos que não sejam de permissão.
       allow update: if souAdmin() ||
         (logado() && request.auth.uid == uid &&

@@ -29,9 +29,34 @@
   <div class="card">
     <h2>Usuários</h2>
     <table class="admin-table" id="tabela-usuarios">
-      <thead><tr><th>Nome</th><th>Email</th><th>Admin</th><th>Prestador de</th><th>Status</th></tr></thead>
+      <thead><tr><th>Nome</th><th>Email</th><th>Admin</th><th>Prestador de</th><th>Status</th><th></th></tr></thead>
       <tbody></tbody>
     </table>
+  </div>
+
+  <div class="card hidden" id="card-editar-usuario">
+    <h2>Editar usuário</h2>
+    <p class="meta" id="editar-usuario-email"></p>
+    <form id="form-editar-usuario">
+      <label for="e-nome">Nome</label>
+      <input type="text" id="e-nome" required maxlength="100" />
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="e-admin" />
+        <label for="e-admin" style="margin:0;">É administrador</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="e-ativo" />
+        <label for="e-ativo" style="margin:0;">Conta ativa</label>
+      </div>
+
+      <label>Prestador dos departamentos</label>
+      <div id="e-departamentos"></div>
+
+      <button class="btn" type="submit" id="btn-salvar-usuario">Salvar</button>
+      <button class="btn secondary" type="button" id="btn-cancelar-edicao">Cancelar</button>
+      <p class="erro hidden" id="erro-editar-usuario"></p>
+    </form>
   </div>
 
   <div class="card">

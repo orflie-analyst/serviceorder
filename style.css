@@ -1,15 +1,15 @@
 :root {
-  --primary: #1f4e8c;
-  --primary-dark: #163a68;
+  --primary: #f5821f;
+  --primary-dark: #d5690f;
   --accent: #2f8f5b;
-  --bg: #f4f6f9;
-  --surface: #ffffff;
-  --border: #dde3ea;
-  --text: #1c2530;
-  --text-muted: #5c6b7a;
-  --danger: #c0392b;
-  --status-aberta: #c0392b;
-  --status-andamento: #b5860a;
+  --bg: #0a0a0a;
+  --surface: #161616;
+  --border: #2c2c2c;
+  --text: #f2f2f2;
+  --text-muted: #9a9a9a;
+  --danger: #e5534b;
+  --status-aberta: #e5534b;
+  --status-andamento: #3b82f6;
   --status-concluida: #2f8f5b;
   --radius: 8px;
   font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -29,7 +29,7 @@ body {
 a { color: var(--primary); }
 
 header.topbar {
-  background: var(--primary-dark);
+  background: #000;
   color: #fff;
   display: flex;
   align-items: center;
@@ -37,12 +37,27 @@ header.topbar {
   padding: 0.75rem 1.5rem;
   flex-wrap: wrap;
   gap: 0.5rem;
+  border-bottom: 1px solid var(--border);
 }
 
 header.topbar .brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+header.topbar .brand img {
+  height: 28px;
+  width: auto;
+  display: block;
+}
+
+header.topbar .brand span {
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1rem;
   letter-spacing: 0.02em;
+  color: #f2f2f2;
 }
 
 header.topbar nav {
@@ -53,26 +68,26 @@ header.topbar nav {
 }
 
 header.topbar nav a {
-  color: #dce7f5;
+  color: #cfcfcf;
   text-decoration: none;
   font-size: 0.95rem;
 }
 
 header.topbar nav a:hover,
 header.topbar nav a.active {
-  color: #fff;
+  color: var(--primary);
   text-decoration: underline;
 }
 
 header.topbar #usuario-nome {
-  color: #b9cbe3;
+  color: #8a8a8a;
   font-size: 0.85rem;
 }
 
 header.topbar button.link-btn {
   background: none;
   border: none;
-  color: #dce7f5;
+  color: #cfcfcf;
   cursor: pointer;
   font-size: 0.9rem;
   padding: 0;
@@ -92,6 +107,23 @@ main {
   width: 100%;
   max-width: 380px;
   padding: 2rem 1rem;
+}
+
+.login-logo {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.login-logo img {
+  height: 48px;
+  width: auto;
+}
+
+.login-logo p {
+  margin: 0.5rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
 }
 
 .card {
@@ -124,7 +156,17 @@ textarea {
   border-radius: 6px;
   font-size: 0.95rem;
   font-family: inherit;
-  background: #fff;
+  background: #0d0d0d;
+  color: var(--text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #6b6b6b;
+}
+
+select option {
+  background: #161616;
   color: var(--text);
 }
 
@@ -133,11 +175,12 @@ textarea { resize: vertical; min-height: 80px; }
 button.btn {
   display: inline-block;
   background: var(--primary);
-  color: #fff;
+  color: #0a0a0a;
   border: none;
   border-radius: 6px;
   padding: 0.6rem 1.1rem;
   font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   margin-top: 1rem;
 }
@@ -145,10 +188,13 @@ button.btn {
 button.btn:hover { background: var(--primary-dark); }
 
 button.btn.secondary {
-  background: #fff;
+  background: transparent;
   color: var(--primary);
   border: 1px solid var(--primary);
+  font-weight: 400;
 }
+
+button.btn.secondary:hover { background: rgba(245, 130, 31, 0.1); }
 
 button.btn.danger { background: var(--danger); }
 
