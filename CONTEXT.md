@@ -8,10 +8,22 @@ Leia este arquivo primeiro ao retomar o trabalho.
 
 ## Stack
 
-- **Firebase Auth** (email/senha, contas criadas só por admin — sem self-signup) + **Firestore**.
+- **Firebase Auth** (email/senha) + **Firestore**. Auto-cadastro habilitado em `index.html`
+  para qualquer email `@orflie.com` — sempre criado com privilégios mínimos (solicitante
+  comum); só um admin promove depois via `admin.html`. Continua sem cadastro público
+  irrestrito (domínio reforçado nas Firestore rules, não só na UI).
 - Site estático (HTML/CSS/JS módulo, sem build step) publicado no **GitHub Pages**.
 - Mesmo padrão usado nos projetos DojoPass/AcademiaTeste/AcademiaPlus (ver memória de sessões
   anteriores se precisar comparar), mas este é um projeto separado, sem relação com aquele.
+
+## Identidade visual
+
+Paleta preto/laranja (cores da marca Orflie): `--bg`/`--surface` em preto/quase-preto,
+`--primary` laranja (`#f5821f`), topbar em preto puro. Logo real em `assets/orflie-logo.png`
+(copiado de `Downloads/logo-light.png` — versão clara do logo, feita pra fundo escuro).
+Usado na topbar (via `renderTopbar()` em `app/auth.js`) e na tela de login, ao lado do texto
+"Sistema de Ordem de Serviço". Se o logo for atualizado, substituir esse arquivo mantendo o
+nome — nada mais referencia o caminho original em Downloads.
 
 ## Contas
 
@@ -39,16 +51,21 @@ e `concluidoEm` preenchido; os painéis e o relatório futuro são queries filtr
 
 Ver `firestore.rules`. Resumo: solicitante só lê/comenta as próprias OS; prestador só
 atualiza/comenta OS do(s) departamento(s) em que está em `departamentosPrestador`; admin
-tem acesso total. Ninguém edita `isAdmin`/`departamentosPrestador` do próprio usuário.
+tem acesso total. Ninguém edita `isAdmin`/`departamentosPrestador` do próprio usuário —
+nem por auto-cadastro (`autoCadastroValido()` força `isAdmin: false`,
+`departamentosPrestador: []`, `ativo: true` e email do doc == email do token, com domínio
+`@orflie.com` checado via regex no próprio token, não no campo enviado pelo cliente).
 
 ## Páginas
 
-- `index.html` — login.
+- `index.html` — login **e auto-cadastro** (toggle entre os dois forms; cadastro exige
+  email `@orflie.com`).
 - `nova-os.html` — abrir OS (qualquer colaborador logado).
 - `minhas-os.html` — OS abertas pelo usuário (visão solicitante).
 - `painel.html` — fila de OS dos departamentos em que o usuário é prestador + concluídas.
 - `os.html?id=...` — detalhe/timeline de uma OS, adicionar nota, mudar status/concluir.
-- `admin.html` — CRUD de departamentos + criação de usuários (admin only).
+- `admin.html` — CRUD de departamentos, criação de usuários **e edição de usuário
+  existente** (nome, isAdmin, departamentosPrestador, ativo — botão "Editar" por linha).
 
 ## Gotchas conhecidos (herdados de projetos irmãos, aplicam aqui também)
 
@@ -87,7 +104,15 @@ conta, (4) regra revertida e redeployada imediatamente. Não precisa repetir ess
 — só documentado aqui caso um segundo Firebase project precise do mesmo bootstrap no
 futuro (ex: se este projeto for clonado para outra empresa/ambiente).
 
-**Gap conhecido**: `admin.html` só tem formulário de *criar* usuário — não dá pra editar
-`isAdmin`/`departamentosPrestador`/`ativo` de um usuário já existente pela UI. Pra isso
-hoje só dá via Firestore Console ou console JS autenticado como admin (as regras permitem,
-só falta a tela). Vale adicionar uma UI de edição se isso virar necessidade recorrente.
+**Atualização 2026-07-30 (rebrand + auto-cadastro + edição de usuário):** identidade visual
+preto/laranja com o logo real (ver seção "Identidade visual" acima); `admin.html` ganhou
+edição de usuário existente (gap anterior, já resolvido); `index.html` ganhou auto-cadastro
+restrito a `@orflie.com` com privilégios mínimos por padrão. Tudo testado no ar: rules
+publicadas, auto-cadastro criou um usuário de teste com `isAdmin:false`/
+`departamentosPrestador:[]` como esperado (conta de teste apagada depois), edição de
+usuário confirmada diretamente contra as regras publicadas. **Gotcha de cache do GitHub
+Pages**: assets servidos com `Cache-Control: max-age=600` — depois de um deploy, o
+navegador pode continuar servindo a versão antiga de `.js`/`.css` por até 10 min mesmo
+com reload forçado (não é um hard-refresh de verdade sem DevTools). Pra verificar uma
+mudança recém-publicada sem esperar, buscar o arquivo direto (`curl`) ou importar o módulo
+com `?v=` cache-buster confirma o conteúdo já está atualizado na origem.
