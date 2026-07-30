@@ -2,6 +2,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  deleteDoc,
   collection,
   addDoc,
   getDocs,
@@ -49,6 +50,7 @@ async function carregar(user, perfil) {
   }
 
   renderDetalhe(detalheEl, d);
+  if (perfil.isAdmin) renderExcluir(detalheEl, ref);
   await renderTimeline();
 
   const podeInteragir = d.status !== "concluida";
@@ -84,6 +86,32 @@ function renderDetalhe(container, d) {
   for (const linha of metaLinhas) {
     container.appendChild(el("div", { class: "meta" }, linha));
   }
+}
+
+function renderExcluir(container, ref) {
+  const btn = el(
+    "button",
+    {
+      class: "btn danger",
+      type: "button",
+      style: "margin-top: 0.5rem;",
+      onclick: async () => {
+        if (!window.confirm("Excluir esta OS definitivamente? Essa ação não pode ser desfeita.")) return;
+        btn.disabled = true;
+        btn.textContent = "Excluindo...";
+        try {
+          await deleteDoc(ref);
+          window.location.href = "minhas-os.html";
+        } catch (err) {
+          btn.disabled = false;
+          btn.textContent = "Excluir OS";
+          window.alert("Não foi possível excluir a OS.");
+        }
+      },
+    },
+    "Excluir OS"
+  );
+  container.appendChild(btn);
 }
 
 async function renderTimeline() {

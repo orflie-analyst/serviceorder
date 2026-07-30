@@ -30,7 +30,7 @@
       <input type="text" id="c-nome" required maxlength="100" />
 
       <label for="c-email">Email</label>
-      <input type="email" id="c-email" required placeholder="voce@orflie.com" />
+      <input type="email" id="c-email" required placeholder="voce@orflie.com ou voce@orflie.com.br" />
 
       <label for="c-senha">Senha</label>
       <input type="password" id="c-senha" required minlength="6" autocomplete="new-password" />
@@ -49,7 +49,7 @@
 </main>
 
 <script type="module">
-  import { login, signup, redirectIfLoggedIn, DOMINIO_PERMITIDO } from "./app/auth.js";
+  import { login, signup, redirectIfLoggedIn, DOMINIOS_PERMITIDOS } from "./app/auth.js";
 
   redirectIfLoggedIn();
 
@@ -96,8 +96,9 @@
     const senha = document.getElementById("c-senha").value;
     const senha2 = document.getElementById("c-senha2").value;
 
-    if (!email.toLowerCase().endsWith(`@${DOMINIO_PERMITIDO}`)) {
-      erro.textContent = `Use um email @${DOMINIO_PERMITIDO}.`;
+    const emailValido = DOMINIOS_PERMITIDOS.some((d) => email.toLowerCase().endsWith(`@${d}`));
+    if (!emailValido) {
+      erro.textContent = `Use um email @${DOMINIOS_PERMITIDOS.join(" ou @")}.`;
       erro.classList.remove("hidden");
       return;
     }

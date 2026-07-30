@@ -13,8 +13,13 @@ import {
 import { auth, db } from "./firebase-init.js";
 import { el } from "./dom.js";
 
-// Auto-cadastro fica restrito a este domínio (reforçado também nas Firestore rules).
-export const DOMINIO_PERMITIDO = "orflie.com";
+// Auto-cadastro fica restrito a esses domínios (reforçado também nas Firestore rules).
+export const DOMINIOS_PERMITIDOS = ["orflie.com", "orflie.com.br"];
+
+function dominioPermitido(email) {
+  const lower = email.toLowerCase();
+  return DOMINIOS_PERMITIDOS.some((d) => lower.endsWith(`@${d}`));
+}
 
 export function login(email, senha) {
   return signInWithEmailAndPassword(auth, email, senha);
@@ -24,12 +29,12 @@ export function logout() {
   return signOut(auth);
 }
 
-// Auto-cadastro: qualquer colaborador com email @orflie.com pode criar a própria conta,
-// sempre como solicitante comum (isAdmin false, sem departamentos de prestador) — só um
-// admin pode promover depois, via admin.html.
+// Auto-cadastro: qualquer colaborador com email @orflie.com ou @orflie.com.br pode criar
+// a própria conta, sempre como solicitante comum (isAdmin false, sem departamentos de
+// prestador) — só um admin pode promover depois, via admin.html.
 export async function signup(nome, email, senha) {
-  if (!email.toLowerCase().endsWith(`@${DOMINIO_PERMITIDO}`)) {
-    throw new Error(`Use um email @${DOMINIO_PERMITIDO}.`);
+  if (!dominioPermitido(email)) {
+    throw new Error(`Use um email @${DOMINIOS_PERMITIDOS.join(" ou @")}.`);
   }
   const cred = await createUserWithEmailAndPassword(auth, email, senha);
   await setDoc(doc(db, "usuarios", cred.user.uid), {

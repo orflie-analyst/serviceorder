@@ -23,11 +23,11 @@ service cloud.firestore {
         departamentoId in meuUsuario().departamentosPrestador;
     }
 
-    // Auto-cadastro: só com email @orflie.com (confirmado pelo token, não pelo campo
-    // enviado) e sempre com privilégios mínimos — só um admin promove depois.
+    // Auto-cadastro: só com email @orflie.com ou @orflie.com.br (confirmado pelo token,
+    // não pelo campo enviado) e sempre com privilégios mínimos — só um admin promove depois.
     function autoCadastroValido() {
       return request.auth.token.email == request.resource.data.email &&
-        request.auth.token.email.matches('.*@orflie[.]com$') &&
+        request.auth.token.email.matches('.*@orflie[.]com([.]br)?$') &&
         request.resource.data.isAdmin == false &&
         request.resource.data.departamentosPrestador.size() == 0 &&
         request.resource.data.ativo == true;
