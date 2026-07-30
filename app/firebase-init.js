@@ -2,14 +2,13 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
-// Preenchido após `firebase projects:create` + registro do app web (Firebase Console > Configurações do projeto).
 const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: "",
+  apiKey: "AIzaSyDXZqH1cKOSCC-C-3NPVxo1AZDe5ZydzlU",
+  authDomain: "orflie-serviceorder.firebaseapp.com",
+  projectId: "orflie-serviceorder",
+  storageBucket: "orflie-serviceorder.firebasestorage.app",
+  messagingSenderId: "1076051406207",
+  appId: "1:1076051406207:web:0fd22e7e7f58129313be4a",
 };
 
 export const app = initializeApp(firebaseConfig);
@@ -23,5 +22,3 @@ export function getAdminCreationApp() {
   if (existing) return existing;
   return initializeApp(firebaseConfig, "admin-creation");
 }
-
-export const FIREBASE_API_KEY_PLACEHOLDER = firebaseConfig.apiKey;
