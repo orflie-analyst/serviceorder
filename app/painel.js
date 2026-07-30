@@ -8,7 +8,7 @@ import {
 import { db } from "./firebase-init.js";
 import { requireAuth, renderTopbar } from "./auth.js";
 import { renderListaOS } from "./lista-os.js";
-import { clear, el } from "./dom.js";
+import { clear, el, formatDate, STATUS_LABEL } from "./dom.js";
 
 requireAuth(async (user, perfil) => {
   renderTopbar("painel.html", perfil);
@@ -17,12 +17,14 @@ requireAuth(async (user, perfil) => {
   const lista = document.getElementById("lista-os");
   const tabAtivas = document.getElementById("tab-ativas");
   const tabConcluidas = document.getElementById("tab-concluidas");
+  const btnRelatorio = document.getElementById("btn-relatorio");
 
   if (deptIds.length === 0) {
     clear(lista);
     lista.appendChild(el("li", { class: "aviso-vazio" }, "Você não é prestador de nenhum departamento ainda."));
     tabAtivas.disabled = true;
     tabConcluidas.disabled = true;
+    btnRelatorio.disabled = true;
     return;
   }
 
@@ -56,4 +58,51 @@ requireAuth(async (user, perfil) => {
   tabAtivas.addEventListener("click", () => mostrar("ativas"));
   tabConcluidas.addEventListener("click", () => mostrar("concluidas"));
   mostrar("ativas");
+
+  btnRelatorio.addEventListener("click", () => gerarRelatorio(docs, perfil));
 });
+
+function gerarRelatorio(docs, perfil) {
+  const container = document.getElementById("relatorio-print");
+  clear(container);
+
+  const departamentos = [...new Set(docs.map((d) => d.data().departamentoNome))].filter(Boolean).join(", ");
+
+  container.appendChild(el("h1", {}, "Relatório de Ordens de Serviço"));
+  container.appendChild(
+    el("div", { class: "relatorio-meta" }, [
+      el("div", {}, `Departamento(s): ${departamentos || "—"}`),
+      el("div", {}, `Prestador: ${perfil.nome || ""}`),
+      el("div", {}, `Gerado em: ${formatDate(new Date())}`),
+      el("div", {}, `Total de OS: ${docs.length}`),
+    ])
+  );
+
+  const thead = el("thead", {}, el("tr", {}, [
+    el("th", {}, "Título"),
+    el("th", {}, "Solicitante"),
+    el("th", {}, "Status"),
+    el("th", {}, "Responsável"),
+    el("th", {}, "Aberta em"),
+    el("th", {}, "Concluída em"),
+  ]));
+
+  const tbody = el("tbody", {});
+  for (const docSnap of docs) {
+    const d = docSnap.data();
+    tbody.appendChild(
+      el("tr", {}, [
+        el("td", {}, d.titulo),
+        el("td", {}, d.solicitanteNome),
+        el("td", {}, STATUS_LABEL[d.status] || d.status),
+        el("td", {}, d.prestadorNome || "—"),
+        el("td", {}, formatDate(d.criadoEm)),
+        el("td", {}, d.concluidoEm ? formatDate(d.concluidoEm) : "—"),
+      ])
+    );
+  }
+
+  container.appendChild(el("table", {}, [thead, tbody]));
+
+  window.print();
+}

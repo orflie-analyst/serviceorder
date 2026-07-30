@@ -341,3 +341,29 @@ table.admin-table td {
 .inline-form > div { flex: 1; min-width: 160px; }
 
 .hidden { display: none !important; }
+
+.relatorio-print { display: none; }
+
+.relatorio-print h1 { color: #000; }
+.relatorio-print .relatorio-meta { color: #333; font-size: 0.85rem; margin-bottom: 1rem; }
+.relatorio-print table { width: 100%; border-collapse: collapse; font-size: 0.8rem; color: #000; }
+.relatorio-print th,
+.relatorio-print td {
+  border: 1px solid #999;
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+}
+.relatorio-print th { background: #eee; }
+
+@media print {
+  body * { visibility: hidden; }
+  .relatorio-print, .relatorio-print * { visibility: visible; }
+  .relatorio-print {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #fff;
+  }
+}
