@@ -1,0 +1,21 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "ordens",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "solicitanteId", "order": "ASCENDING" },
+        { "fieldPath": "criadoEm", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "ordens",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "departamentoId", "order": "ASCENDING" },
+        { "fieldPath": "criadoEm", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}
