@@ -51,10 +51,13 @@ e `concluidoEm` preenchido; os painéis e o relatório futuro são queries filtr
 
 Ver `firestore.rules`. Resumo: solicitante só lê/comenta as próprias OS; prestador só
 atualiza/comenta OS do(s) departamento(s) em que está em `departamentosPrestador`; admin
-tem acesso total. Ninguém edita `isAdmin`/`departamentosPrestador` do próprio usuário —
-nem por auto-cadastro (`autoCadastroValido()` força `isAdmin: false`,
+tem acesso total, incluindo excluir OS (`allow delete: if souAdmin();`, exposto na UI via
+o botão "Excluir OS" em `os.html`). Ninguém edita `isAdmin`/`departamentosPrestador` do
+próprio usuário — nem por auto-cadastro (`autoCadastroValido()` força `isAdmin: false`,
 `departamentosPrestador: []`, `ativo: true` e email do doc == email do token, com domínio
-`@orflie.com` checado via regex no próprio token, não no campo enviado pelo cliente).
+checado via regex no próprio token, não no campo enviado pelo cliente). A empresa usa dois
+domínios de email — `@orflie.com` e `@orflie.com.br` — ambos aceitos tanto na regra
+(`.*@orflie[.]com([.]br)?$`) quanto em `DOMINIOS_PERMITIDOS` (`app/auth.js`).
 
 ## Páginas
 
@@ -78,6 +81,10 @@ nem por auto-cadastro (`autoCadastroValido()` força `isAdmin: false`,
   departamento, etc.) tem que ser reforçada em `firestore.rules`, não só escondida na UI —
   senão dá pra burlar via SDK/REST direto, como já aconteceu (e foi corrigido) nos projetos
   irmãos.
+- **Excluir OS não apaga as notas**: `notas` tem `allow delete: if false` (histórico
+  imutável por design), então excluir uma OS deixa a subcoleção `notas` órfã no Firestore —
+  invisível na prática (nada faz query cross-OS nela), mas não é limpeza "completa". Mesmo
+  padrão de leftover inofensivo já visto nos projetos irmãos.
 
 ## Status (2026-07-30)
 
