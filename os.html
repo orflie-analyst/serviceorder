@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>OS · Ordens de Serviço Orflie</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<main>
+  <div class="card" id="detalhe-os">
+    <p class="aviso-vazio">Carregando...</p>
+  </div>
+
+  <div class="card">
+    <h2>Histórico</h2>
+    <ul class="timeline" id="timeline"></ul>
+  </div>
+
+  <div class="card hidden" id="card-nova-nota">
+    <h2>Adicionar anotação</h2>
+    <form id="form-nota">
+      <label for="nota-status" id="label-nota-status" class="hidden">Atualizar status</label>
+      <select id="nota-status" class="hidden"></select>
+
+      <label for="nota-texto">Anotação</label>
+      <textarea id="nota-texto" required maxlength="4000" placeholder="Descreva o andamento ou a conclusão do serviço"></textarea>
+
+      <button class="btn" type="submit" id="btn-nota">Salvar</button>
+      <p class="erro hidden" id="erro-nota"></p>
+    </form>
+  </div>
+
+  <div class="card hidden" id="card-concluida-aviso">
+    <p class="aviso-vazio">Esta OS está concluída e arquivada.</p>
+  </div>
+</main>
+
+<script type="module" src="app/os.js"></script>
+</body>
+</html>

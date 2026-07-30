@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Nova OS · Ordens de Serviço Orflie</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<main>
+  <div class="card">
+    <h1>Abrir nova Ordem de Serviço</h1>
+    <form id="form-os">
+      <label for="departamento">Departamento</label>
+      <select id="departamento" required>
+        <option value="" disabled selected>Carregando departamentos...</option>
+      </select>
+
+      <label for="titulo">Título</label>
+      <input type="text" id="titulo" required maxlength="120" placeholder="Resumo curto do que você precisa" />
+
+      <label for="descricao">Descrição</label>
+      <textarea id="descricao" required maxlength="4000" placeholder="Detalhe o que precisa ser feito"></textarea>
+
+      <button class="btn" type="submit" id="btn-criar">Abrir OS</button>
+      <p class="erro hidden" id="erro"></p>
+    </form>
+  </div>
+</main>
+
+<script type="module" src="app/nova-os.js"></script>
+</body>
+</html>

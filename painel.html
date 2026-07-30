@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Painel do prestador · Ordens de Serviço Orflie</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<main>
+  <div class="card">
+    <h1>Painel do prestador</h1>
+    <div class="tabs">
+      <button type="button" id="tab-ativas" class="active">Ativas</button>
+      <button type="button" id="tab-concluidas">Concluídas</button>
+    </div>
+    <ul class="lista-os" id="lista-os">
+      <li class="aviso-vazio">Carregando...</li>
+    </ul>
+  </div>
+</main>
+
+<script type="module" src="app/painel.js"></script>
+</body>
+</html>
