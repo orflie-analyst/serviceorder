@@ -1,5 +1,17 @@
 rules_version = '2';
 
+// ATENÇÃO: este arquivo é o firestore.rules NOVO e COMPLETO do projeto Firebase
+// "orflie-serviceorder", que passa a ser o projeto compartilhado por ServiceOrder,
+// Central e Updates (login único). Substituir o firestore.rules do repositório
+// orflie-analyst/serviceorder por este arquivo inteiro (não é um diff/adição pra
+// colar por cima — é o conteúdo final) e rodar:
+//   firebase deploy --only firestore:rules --project orflie-serviceorder
+//
+// O que mudou em relação ao firestore.rules original do ServiceOrder:
+//   - usuarios/departamentos/ordens/notas: NADA mudou, é o texto original.
+//   - Duas seções novas no fim: avisos (vindo do Central) e updates (sistema novo).
+// Ver MIGRATION.md na raiz deste repositório de staging para o passo a passo completo.
+
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -17,6 +29,12 @@ service cloud.firestore {
         meuUsuario().isAdmin == true;
     }
 
+    function souUsuarioAtivo() {
+      return logado() &&
+        exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+        meuUsuario().ativo != false;
+    }
+
     function souPrestadorDe(departamentoId) {
       return logado() &&
         exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
@@ -25,6 +43,7 @@ service cloud.firestore {
 
     // Auto-cadastro: só com email @orflie.com ou @orflie.com.br (confirmado pelo token,
     // não pelo campo enviado) e sempre com privilégios mínimos — só um admin promove depois.
+    // Usado pelo index.html do ServiceOrder E do Central (ambos escrevem no mesmo doc).
     function autoCadastroValido() {
       return request.auth.token.email == request.resource.data.email &&
         request.auth.token.email.matches('.*@orflie[.]com([.]br)?$') &&
@@ -85,6 +104,28 @@ service cloud.firestore {
         allow update: if false;
         allow delete: if false;
       }
+    }
+
+    // --- NOVO: migrado do projeto orflie-central (login único, 2026-08) ---
+    // Quadro de avisos: qualquer usuário autenticado e ativo lê; só admin publica/remove.
+    match /avisos/{avisoId} {
+      allow read: if souUsuarioAtivo();
+      allow create, update, delete: if souAdmin();
+    }
+
+    // --- NOVO: sistema Updates (login único, 2026-08) ---
+    // Cada operador só lê os próprios updates; admin lê todos. Criação só em nome
+    // próprio, com conta/texto preenchidos. Sem edição (histórico imutável); exclusão
+    // manual só por admin — exclusão automática aos 30 dias é feita pela política de
+    // TTL do Firestore no campo expiraEm (configurada fora das rules, ver MIGRATION.md).
+    match /updates/{updateId} {
+      allow read: if logado() && (resource.data.autorId == request.auth.uid || souAdmin());
+      allow create: if logado() &&
+        request.resource.data.autorId == request.auth.uid &&
+        request.resource.data.conta is string && request.resource.data.conta.size() > 0 &&
+        request.resource.data.texto is string && request.resource.data.texto.size() > 0;
+      allow update: if false;
+      allow delete: if souAdmin();
     }
   }
 }
