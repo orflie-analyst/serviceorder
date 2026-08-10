@@ -7,8 +7,10 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import { db } from "./firebase-init.js";
 import { requireAuth, renderTopbar } from "./auth.js";
-import { renderListaOS } from "./lista-os.js";
+import { renderListaOS, renderPaginacao } from "./lista-os.js";
 import { clear, el, formatDate, STATUS_LABEL } from "./dom.js";
+
+const TAMANHO_PAGINA = 20;
 
 requireAuth(async (user, perfil) => {
   renderTopbar("painel.html", perfil);
@@ -43,15 +45,38 @@ requireAuth(async (user, perfil) => {
     return;
   }
 
+  const paginacaoEl = document.getElementById("paginacao");
+  let abaAtual = "ativas";
+  let filtradosAtual = [];
+  let paginaAtual = 1;
+
   function mostrar(aba) {
+    abaAtual = aba;
     tabAtivas.classList.toggle("active", aba === "ativas");
     tabConcluidas.classList.toggle("active", aba === "concluidas");
-    const filtrados = docs.filter((d) =>
+    filtradosAtual = docs.filter((d) =>
       aba === "ativas" ? d.data().status !== "concluida" : d.data().status === "concluida"
     );
-    renderListaOS(lista, filtrados, {
-      vazio: aba === "ativas" ? "Nenhuma OS ativa no momento." : "Nenhuma OS concluída ainda.",
+    paginaAtual = 1;
+    renderPagina();
+  }
+
+  function renderPagina() {
+    const inicio = (paginaAtual - 1) * TAMANHO_PAGINA;
+    const pagina = filtradosAtual.slice(inicio, inicio + TAMANHO_PAGINA);
+    renderListaOS(lista, pagina, {
+      vazio: abaAtual === "ativas" ? "Nenhuma OS ativa no momento." : "Nenhuma OS concluída ainda.",
       subtitulo: (d) => d.solicitanteNome,
+    });
+    renderPaginacao(paginacaoEl, {
+      totalItens: filtradosAtual.length,
+      paginaAtual,
+      tamanhoPagina: TAMANHO_PAGINA,
+      aoMudarPagina: (p) => {
+        paginaAtual = p;
+        renderPagina();
+        lista.scrollIntoView({ behavior: "smooth", block: "start" });
+      },
     });
   }
 

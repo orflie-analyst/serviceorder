@@ -24,3 +24,37 @@ export function renderListaOS(container, docs, { vazio = "Nenhuma OS encontrada.
     container.appendChild(el("li", {}, link));
   }
 }
+
+// Controles de "Anterior/Próxima" pra listas de OS longas (ex: fila de concluídas
+// de um prestador com muito histórico). Não renderiza nada se couber tudo numa página.
+export function renderPaginacao(container, { totalItens, paginaAtual, tamanhoPagina, aoMudarPagina }) {
+  clear(container);
+  const totalPaginas = Math.max(1, Math.ceil(totalItens / tamanhoPagina));
+  if (totalPaginas <= 1) return;
+
+  container.appendChild(
+    el("div", { class: "paginacao" }, [
+      el(
+        "button",
+        {
+          class: "btn secondary",
+          type: "button",
+          disabled: paginaAtual <= 1,
+          onclick: () => aoMudarPagina(paginaAtual - 1),
+        },
+        "‹ Anterior"
+      ),
+      el("span", { class: "paginacao-info" }, `Página ${paginaAtual} de ${totalPaginas}`),
+      el(
+        "button",
+        {
+          class: "btn secondary",
+          type: "button",
+          disabled: paginaAtual >= totalPaginas,
+          onclick: () => aoMudarPagina(paginaAtual + 1),
+        },
+        "Próxima ›"
+      ),
+    ])
+  );
+}
