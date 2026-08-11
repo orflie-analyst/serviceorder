@@ -10,7 +10,7 @@ import { requireAuth, renderTopbar } from "./auth.js";
 import { renderListaOS, renderPaginacao } from "./lista-os.js";
 import { clear, el, formatDate, STATUS_LABEL } from "./dom.js";
 
-const TAMANHO_PAGINA = 20;
+const TAMANHO_PAGINA = 10;
 
 requireAuth(async (user, perfil) => {
   renderTopbar("painel.html", perfil);
