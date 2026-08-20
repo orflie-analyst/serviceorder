@@ -41,6 +41,12 @@ service cloud.firestore {
         departamentoId in meuUsuario().departamentosPrestador;
     }
 
+    function souLiderDoSquad(squad) {
+      return logado() &&
+        exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+        meuUsuario().squad == squad;
+    }
+
     // Auto-cadastro: só com email @orflie.com ou @orflie.com.br (confirmado pelo token,
     // não pelo campo enviado) e sempre com privilégios mínimos — só um admin promove depois.
     // Usado pelo index.html do ServiceOrder E do Central (ambos escrevem no mesmo doc).
@@ -125,6 +131,44 @@ service cloud.firestore {
         request.resource.data.conta is string && request.resource.data.conta.size() > 0 &&
         request.resource.data.texto is string && request.resource.data.texto.size() > 0;
       allow update: if false;
+      allow delete: if souAdmin();
+    }
+
+    // --- NOVO: Programa de Incentivo — lançamentos dos líderes de Squad (2026-08) ---
+    // Cada líder só lê/lança/edita os dados do próprio squad (campo `squad` no doc);
+    // admin tem acesso total. `update` trava o campo `squad` — não dá pra "mudar de
+    // dono" um lançamento já criado. `delete` só admin (mesmo padrão do resto do app).
+
+    match /relacionamentos/{id} {
+      allow read: if logado() && (souAdmin() || souLiderDoSquad(resource.data.squad));
+      allow create: if logado() &&
+        request.resource.data.autorId == request.auth.uid &&
+        (souAdmin() || souLiderDoSquad(request.resource.data.squad));
+      allow update: if logado() &&
+        request.resource.data.squad == resource.data.squad &&
+        (souAdmin() || souLiderDoSquad(resource.data.squad));
+      allow delete: if souAdmin();
+    }
+
+    match /compromissos/{id} {
+      allow read: if logado() && (souAdmin() || souLiderDoSquad(resource.data.squad));
+      allow create: if logado() &&
+        request.resource.data.autorId == request.auth.uid &&
+        (souAdmin() || souLiderDoSquad(request.resource.data.squad));
+      allow update: if logado() &&
+        request.resource.data.squad == resource.data.squad &&
+        (souAdmin() || souLiderDoSquad(resource.data.squad));
+      allow delete: if souAdmin();
+    }
+
+    match /churns/{id} {
+      allow read: if logado() && (souAdmin() || souLiderDoSquad(resource.data.squad));
+      allow create: if logado() &&
+        request.resource.data.autorId == request.auth.uid &&
+        (souAdmin() || souLiderDoSquad(request.resource.data.squad));
+      allow update: if logado() &&
+        request.resource.data.squad == resource.data.squad &&
+        (souAdmin() || souLiderDoSquad(resource.data.squad));
       allow delete: if souAdmin();
     }
   }
