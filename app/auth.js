@@ -84,6 +84,7 @@ export function renderTopbar(activePage, perfil) {
     { href: "minhas-os.html", label: "Minhas OS" },
   ];
   if (isPrestador) links.push({ href: "painel.html", label: "Painel do prestador" });
+  if (perfil.isAdmin) links.push({ href: "relatorio.html", label: "Relatório" });
   if (perfil.isAdmin) links.push({ href: "admin.html", label: "Administração" });
 
   const nav = el("nav", {}, [

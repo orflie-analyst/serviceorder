@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Relatório de Produtividade · Ordens de Serviço Orflie</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<main id="conteudo">
+  <div class="card">
+    <h1>Relatório de Produtividade</h1>
+    <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: -0.5rem;">
+      Quantas OS cada prestador concluiu no período, com o tempo médio entre abertura e conclusão.
+    </p>
+    <div class="inline-form">
+      <div>
+        <label for="filtro-mes">Mês</label>
+        <input type="month" id="filtro-mes" />
+      </div>
+      <div>
+        <label for="filtro-departamento">Departamento</label>
+        <select id="filtro-departamento">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <button class="btn" type="button" id="btn-gerar">Gerar</button>
+      <button class="btn secondary" type="button" id="btn-imprimir">Gerar PDF</button>
+    </div>
+
+    <table class="admin-table" id="tabela-produtividade">
+      <thead>
+        <tr><th>Prestador</th><th>OS concluídas</th><th>Tempo médio de resolução</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <p class="aviso-vazio hidden" id="aviso-vazio-relatorio">Nenhuma OS concluída nesse período.</p>
+  </div>
+</main>
+
+<div id="relatorio-print" class="relatorio-print"></div>
+
+<script type="module" src="app/relatorio.js"></script>
+</body>
+</html>
