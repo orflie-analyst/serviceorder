@@ -47,6 +47,14 @@ service cloud.firestore {
         meuUsuario().squad == squad;
     }
 
+    // Responsável por lançar Compromisso (RH) — cross-squad, não amarrado a um squad
+    // específico como souLiderDoSquad. Só admin atribui esse flag (ver usuarios/{uid}).
+    function podeLancarCompromisso() {
+      return logado() &&
+        exists(/databases/$(database)/documents/usuarios/$(request.auth.uid)) &&
+        meuUsuario().podeLancarCompromisso == true;
+    }
+
     // Auto-cadastro: só com email @orflie.com ou @orflie.com.br (confirmado pelo token,
     // não pelo campo enviado) e sempre com privilégios mínimos — só um admin promove depois.
     // Usado pelo index.html do ServiceOrder E do Central (ambos escrevem no mesmo doc).
@@ -61,11 +69,16 @@ service cloud.firestore {
     match /usuarios/{uid} {
       allow read: if logado() && (request.auth.uid == uid || souAdmin());
       allow create: if souAdmin() || (logado() && request.auth.uid == uid && autoCadastroValido());
-      // Usuário comum só pode alterar campos que não sejam de permissão.
+      // Usuário comum só pode alterar campos que não sejam de permissão — squad e
+      // podeLancarCompromisso incluídos aqui pelo mesmo motivo de isAdmin/
+      // departamentosPrestador: dão acesso aos lançamentos do Programa de Incentivo,
+      // só admin atribui. Todo campo de permissão novo tem que entrar nessa lista.
       allow update: if souAdmin() ||
         (logado() && request.auth.uid == uid &&
           request.resource.data.isAdmin == resource.data.isAdmin &&
-          request.resource.data.departamentosPrestador == resource.data.departamentosPrestador);
+          request.resource.data.departamentosPrestador == resource.data.departamentosPrestador &&
+          request.resource.data.squad == resource.data.squad &&
+          request.resource.data.podeLancarCompromisso == resource.data.podeLancarCompromisso);
       allow delete: if souAdmin();
     }
 
@@ -152,15 +165,16 @@ service cloud.firestore {
       allow delete: if souAdmin() || souLiderDoSquad(resource.data.squad);
     }
 
+    // Compromisso é gerenciado só pela RH (podeLancarCompromisso), não pelos líderes
+    // de squad — ela lança pra operadores de qualquer squad, por isso não usa
+    // souLiderDoSquad como relacionamentos/churns usam.
     match /compromissos/{id} {
-      allow read: if logado() && (souAdmin() || souLiderDoSquad(resource.data.squad));
+      allow read: if logado() && (souAdmin() || podeLancarCompromisso());
       allow create: if logado() &&
         request.resource.data.autorId == request.auth.uid &&
-        (souAdmin() || souLiderDoSquad(request.resource.data.squad));
-      allow update: if logado() &&
-        request.resource.data.squad == resource.data.squad &&
-        (souAdmin() || souLiderDoSquad(resource.data.squad));
-      allow delete: if souAdmin() || souLiderDoSquad(resource.data.squad);
+        (souAdmin() || podeLancarCompromisso());
+      allow update: if logado() && (souAdmin() || podeLancarCompromisso());
+      allow delete: if souAdmin() || podeLancarCompromisso();
     }
 
     match /churns/{id} {
